@@ -24,7 +24,7 @@ public class BasePage extends PageFactory {
     private static WebDriver driver;
     private static String path = "src/test/resources/drivers/";
     int timeout;
-    protected Map<String,String> variables;
+    protected Map<String,Object> variables;
 
     public BasePage() {
         PageFactory.initElements(driver, this);

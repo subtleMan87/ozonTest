@@ -14,8 +14,10 @@ public class StepDefs {
         mainPage.open();
         mainPage.goToLogin();
         mainPage.login(login,pass);
-        mainPage.search("Iphone");
-        mainPage.addEvenProductsInBasket();
+//        mainPage.search("Iphone");
+//        mainPage.addEvenProductsInBasket();
+//        mainPage.goToCart();
+        mainPage.checkEmptyOfCart();
         //TODO проверить аллюр
     }
 }

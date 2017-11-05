@@ -12,6 +12,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import util.Config;
 import util.Variables;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainPage extends BasePage {
@@ -46,13 +47,22 @@ public class MainPage extends BasePage {
     @FindBy(xpath = "//div[contains(@class,'jsRemoveAll')]")
     public WebElement removeAll;
 
-    @FindBy(xpath = "//div[text()='Выйти']")
+//    @FindBy(xpath = "//div[text()='Выйти']")
+    @FindBy(xpath = "//div[contains(text(),'Выйти')]")
     public WebElement logout;
 
-//    @FindBy(xpath = "//div[@itemprop='itemListElement']")
     @FindBy(xpath = "//div[@itemprop='itemListElement']//div[text()=' В корзину ']")
-//    @FindBy(xpath = "//div[text()='В корзину']")
     public List<WebElement> products;
+
+    @FindBy(xpath = "//div[contains(@class,'bCartItem')]")
+    public List<WebElement> productsInCart;
+
+    @FindBy(xpath = "//div[contains(@class,'jsQuickPanelUserMenu')]")
+    public WebElement userMenu;
+
+    @FindBy(xpath = "//span[normalize-space(text()='Корзина пуста') and @class='jsInnerContentpage_title']")
+    public WebElement labelOfEmptyCart;
+
 
 //    bCartItem   jsChild_DOM_items_33369612
 //
@@ -78,10 +88,10 @@ public class MainPage extends BasePage {
 
     public void login(String login, String pass) {
         loginField.sendKeys(login);
-        wait(1);
         passwordField.sendKeys(pass);
+        wait(1);
         enter.click();
-        wait(5);
+        wait(15);
     }
 
     public void search(String name) {
@@ -91,39 +101,44 @@ public class MainPage extends BasePage {
 
     public void addEvenProductsInBasket() {
         JavascriptExecutor je = (JavascriptExecutor) getDriver();
-        String productNames="";
+        ArrayList<String> productNames = new ArrayList<>();
         wait(1);
-        for (int i = 0; i < products.size(); i++) {
-            WebElement product = products.get(i);
-//            getDriver().findElements(By.xpath("//div[text()=' В корзину ']"))
-            WebDriverWait wait = new WebDriverWait(getDriver(), 0);
-            WebElement addToCart;
-//            addToCart = product.findElement(By.xpath("//div[contains(@class,'bFlatButton mTitle mAddToCart js_add')]"));
-//            addToCart = product.findElement(By.xpath("//div[text()=' В корзину ']"));
-            if (product.isDisplayed()) {
-                try {
-//                    wait.until(ExpectedConditions.elementToBeClickable(product));
-                    je.executeScript("arguments[0].scrollIntoView(true);",product);
-                    je.executeScript("scrollBy(0,-200);");
-                    productNames += product.findElement(By.xpath(".//../../..//a/div[@class='eOneTile_ItemName']")).getText() + ";";
-                    product.click();
-                    System.out.println(i + "ok");
-                } catch (TimeoutException e) {
-                    System.out.println(i + "not clickable");
-                }
-//
-            } else {
-                System.out.println(i + "not disp");
-            }
-
-
-//            product.findElement(By.xpath("//div[@class,'bFlatButton mTitle mAddToCart js_add']")).click();
-            if (i == 2) {
-//                break;
-            }
+        for (WebElement product : products) {
+            //TODO добавить проверку на нечетность
+//            if (product.isDisplayed()) {
+                je.executeScript("arguments[0].scrollIntoView(true);", product);
+                je.executeScript("scrollBy(0,-200);");
+                productNames.add(product
+                        .findElement(By.xpath(".//../../..//a/div[@class='eOneTile_ItemName']")).getText());
+                product.click();
+//            }
         }
 
-        variables.put("Товары в корзине",productNames);
+        variables.put("Товары в корзине", productNames);
+    }
+
+    public void goToCart() {
+        cart.click();
+        wait(5);
+
+        ArrayList<String> productNamesInCart = new ArrayList<>();
+        for (int i = 0; i < productsInCart.size(); i++) {
+            productNamesInCart.add(productsInCart.get(i)
+                    .findElement(By.xpath(".//div[contains(@class,'eCartItem_name')]//span")).getText());
+        }
+
+        removeAll.click();
+
+        new Actions(getDriver()).moveToElement(userMenu).build().perform();
+        visibilityOf(logout, timeout);
+        logout.click();
+    }
+
+//    div class="bCartPage
+    public void checkEmptyOfCart() {
+        cart.click();
+        Assert.assertTrue("Не обнаружили фразы='Корзина пуста'", labelOfEmptyCart.isDisplayed());
+        Assert.assertTrue("В корзине имеются товары", productsInCart.isEmpty());
     }
 
 }

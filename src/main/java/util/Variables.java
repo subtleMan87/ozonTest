@@ -8,7 +8,7 @@ import java.util.Map;
  */
 public class Variables {
     private static Variables instance;
-    private static Map<String,String> variables;
+    private static Map <String, Object> variables;
 
     public static synchronized Variables getInstance() {
         if (instance == null) {
@@ -23,7 +23,7 @@ public class Variables {
         }
     }
 
-    public Map<String,String> getVariables() {
+    public Map<String,Object> getVariables() {
         return variables;
     }
 
@@ -31,7 +31,7 @@ public class Variables {
         variables.put(key, value);
     }
 
-    public static String get(String key) {
+    public static Object get(String key) {
         return variables.get(key);
     }
 }
