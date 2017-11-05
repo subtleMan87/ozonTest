@@ -1,16 +1,19 @@
 package pageObjects;
 
-import cucumber.api.java.Before;
+import exceptions.ScenarioLogicalException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import util.Config;
+import util.Variables;
 
 import java.io.File;
-import java.util.Set;
+import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -20,11 +23,13 @@ public class BasePage extends PageFactory {
 
     private static WebDriver driver;
     private static String path = "src/test/resources/drivers/";
-    public int timeout;
+    int timeout;
+    protected Map<String,String> variables;
 
     public BasePage() {
         PageFactory.initElements(driver, this);
         timeout=Integer.parseInt(Config.get("ozon.timeout"));
+        variables = Variables.getInstance().getVariables();
     }
 
     public WebDriver getDriver(){
@@ -33,9 +38,20 @@ public class BasePage extends PageFactory {
 
     public static void initDriver() {
         if (driver == null) {
-            File chromeDriverFile = new File(path + "chromedriver.exe");
-            System.setProperty("webdriver.chrome.driver", chromeDriverFile.getAbsolutePath());
-            driver = new ChromeDriver();
+            switch (Config.get("browser").toLowerCase(Locale.ENGLISH)) {
+                case "chrome":
+                    File chromeDriverFile = new File(path + "chromedriver.exe");
+                    System.setProperty("webdriver.chrome.driver", chromeDriverFile.getAbsolutePath());
+                    driver = new ChromeDriver();
+                    break;
+                case "firefox":
+                    String workingDir = System.getProperty("user.dir");
+                    System.setProperty("webdriver.firefox.marionette", workingDir + "\\drv\\geckodriver.exe");
+                    driver = new FirefoxDriver();
+                    break;
+                default: throw new ScenarioLogicalException("Неподдерживаемый тип браузера=" + System.getProperty("browser"));
+            }
+
             driver.manage().deleteAllCookies();
             driver.manage().timeouts().pageLoadTimeout(
                     Integer.parseInt(Config.get("ozon.timeout")), TimeUnit.SECONDS);
@@ -64,7 +80,6 @@ public class BasePage extends PageFactory {
     }
 
     public void switchToNewWnd() {
-        // Switch to new window opened
         for(String winHandle : getDriver().getWindowHandles()){
             getDriver().switchTo().window(winHandle);
         }

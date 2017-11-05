@@ -14,7 +14,8 @@ public class StepDefs {
         mainPage.open();
         mainPage.goToLogin();
         mainPage.login(login,pass);
-
-        //проверить аллюр
+        mainPage.search("Iphone");
+        mainPage.addEvenProductsInBasket();
+        //TODO проверить аллюр
     }
 }

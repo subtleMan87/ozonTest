@@ -13,6 +13,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import pageObjects.BasePage;
 import util.Config;
+import util.Variables;
 
 import java.io.File;
 
