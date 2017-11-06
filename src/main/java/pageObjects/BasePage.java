@@ -1,6 +1,8 @@
 package pageObjects;
 
 import exceptions.ScenarioLogicalException;
+import org.apache.log4j.Logger;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -8,6 +10,8 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import ru.yandex.qatools.htmlelements.loader.decorator.HtmlElementDecorator;
+import ru.yandex.qatools.htmlelements.loader.decorator.HtmlElementLocatorFactory;
 import util.Config;
 import util.Variables;
 
@@ -21,10 +25,12 @@ import java.util.concurrent.TimeUnit;
  */
 public class BasePage extends PageFactory {
 
+    private static final Logger log = Logger.getLogger(BasePage.class);
+
     private static WebDriver driver;
     private static String path = "src/test/resources/drivers/";
     int timeout;
-    protected Map<String,Object> variables;
+    Map<String,Object> variables;
 
     public BasePage() {
         PageFactory.initElements(driver, this);
@@ -37,6 +43,8 @@ public class BasePage extends PageFactory {
     }
 
     public static void initDriver() {
+        log.info("Инициализация WebDriver");
+
         if (driver == null) {
             switch (Config.get("browser").toLowerCase(Locale.ENGLISH)) {
                 case "chrome":
@@ -55,7 +63,7 @@ public class BasePage extends PageFactory {
             driver.manage().deleteAllCookies();
             driver.manage().timeouts().pageLoadTimeout(
                     Integer.parseInt(Config.get("ozon.timeout")), TimeUnit.SECONDS);
-            driver.manage().timeouts().implicitlyWait(5,TimeUnit.SECONDS);
+            driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
             driver.manage().window().maximize();
         }
     }
@@ -64,7 +72,13 @@ public class BasePage extends PageFactory {
         new WebDriverWait(driver, seconds).until(ExpectedConditions.visibilityOf(element));
     }
 
+    public void invisibilityOf(By locator, int seconds) {
+        new WebDriverWait(driver, seconds).until(ExpectedConditions.invisibilityOfElementLocated(locator));
+    }
+
     public void wait(int seconds) {
+        log.info("Ожидание " + seconds + " секунд(ы)");
+
         try {
             Thread.sleep(seconds*1000);
         } catch (InterruptedException e) {
@@ -73,6 +87,8 @@ public class BasePage extends PageFactory {
     }
 
     public static void closeDriver() {
+        log.info("Закрытие WebDriver");
+
         if (driver != null) {
             driver.quit();
             driver=null;

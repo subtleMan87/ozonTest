@@ -1,22 +1,20 @@
 package pageObjects;
 
+import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import util.Config;
-import util.Variables;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class MainPage extends BasePage {
+
+    private static final Logger log = Logger.getLogger(MainPage.class);
 
     @FindBy(xpath = "//span[text()='Мой OZON']")
     public WebElement myOzon;
@@ -56,30 +54,40 @@ public class MainPage extends BasePage {
     }
 
     public void open() {
+        log.info("Переход на главную страницу");
+
         getDriver().get(Config.get("ozon.url"));
         visibilityOf(cart, timeout);
     }
 
     public void goToLogin() {
+        log.info("Переход на форму авторизации");
+
         new Actions(getDriver()).moveToElement(myOzon).build().perform();
         visibilityOf(entry, timeout);
         entry.click();
     }
 
     public void login(String login, String pass) {
+        log.info("Производим логин в систему. Логин=" + login + "  Пароль=" + pass);
+
         loginField.sendKeys(login);
         passwordField.sendKeys(pass);
         wait(1);
         enter.click();
-        wait(15);
+        invisibilityOf(By.xpath("//span[text()='Мой OZON']"),timeout);
     }
 
     public void search(String name) {
+        log.info("Ищем товар=" + name);
+
         searchText.sendKeys(name);
         startSearch.click();
     }
 
     public void addEvenProductsToCart() {
+        log.info("Добавление четных товаров в корзину=");
+
         JavascriptExecutor je = (JavascriptExecutor) getDriver();
         ArrayList<String> productNames = new ArrayList<>();
 
@@ -93,18 +101,22 @@ public class MainPage extends BasePage {
             }
         }
 
+        Assert.assertFalse("Не обнаружено ни одного товара для добавления в корзину", productNames.isEmpty());
         variables.put("Товары в корзине", productNames);
     }
 
     public void logout() {
+        log.info("Выход из системы");
+
         new Actions(getDriver()).moveToElement(userMenu).build().perform();
         visibilityOf(logout, timeout);
         logout.click();
         visibilityOf(myOzon, timeout);
     }
 
-//    div class="bCartPage
     public void goToCart() {
+        log.info("Переход в корзину");
+
         cart.click();
     }
 
