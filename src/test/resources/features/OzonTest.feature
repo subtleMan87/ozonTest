@@ -1,8 +1,14 @@
-Feature: Сохранение видео в YouTube
-  Scenario Outline: Сохранение видео в YouTube
+Feature: Добавление четных товаров в Ozon
+  Scenario Outline: Добавление четных товаров в Ozon
     When Логинимся на сайт Ozon с логином <Логин> и паролем <Пароль>
+    Then Добавим все четные товары по поиску <Товар> и проверим в корзине
+    Then Проверим товары в корзине
+    Then Очистим корзину
+    Then Разлогинимся
+    When Логинимся на сайт Ozon с логином <Логин> и паролем <Пароль>
+    Then Проверяем, что корзина пуста
     Examples:
-    |Логин                    |Пароль      |
-    |subtleMan@yandex.ru      |subtleMan   |
+    |Логин                    |Пароль      |Товар      |
+    |subtleMan@yandex.ru      |subtleMan   |Iphone     |
 
 

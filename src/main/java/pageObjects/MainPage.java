@@ -14,11 +14,9 @@ import util.Variables;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class MainPage extends BasePage {
-
-//    @FindBy(xpath = "//a[contains(@class,'mMulticart')]")
-//    public WebElement cart;
 
     @FindBy(xpath = "//span[text()='Мой OZON']")
     public WebElement myOzon;
@@ -44,32 +42,14 @@ public class MainPage extends BasePage {
     @FindBy(xpath = "//div[@class='mCart']")
     public WebElement cart;
 
-    @FindBy(xpath = "//div[contains(@class,'jsRemoveAll')]")
-    public WebElement removeAll;
-
-//    @FindBy(xpath = "//div[text()='Выйти']")
     @FindBy(xpath = "//div[contains(text(),'Выйти')]")
     public WebElement logout;
 
     @FindBy(xpath = "//div[@itemprop='itemListElement']//div[text()=' В корзину ']")
     public List<WebElement> products;
 
-    @FindBy(xpath = "//div[contains(@class,'bCartItem')]")
-    public List<WebElement> productsInCart;
-
     @FindBy(xpath = "//div[contains(@class,'jsQuickPanelUserMenu')]")
     public WebElement userMenu;
-
-    @FindBy(xpath = "//span[normalize-space(text()='Корзина пуста') and @class='jsInnerContentpage_title']")
-    public WebElement labelOfEmptyCart;
-
-
-//    bCartItem   jsChild_DOM_items_33369612
-//
-//    eCartItem_name
-
-//    itemprop="itemListElement" getDriver().findElements(By.xpath("//div[@itemprop='itemListElement']"))
-    //getDriver().findElements(By.xpath("//div[@itemprop='itemListElement']")).get(0).findElement(By.xpath("//div[contains(@class,'mAddToCart')]"))
 
     public MainPage() {
         super();
@@ -99,46 +79,33 @@ public class MainPage extends BasePage {
         startSearch.click();
     }
 
-    public void addEvenProductsInBasket() {
+    public void addEvenProductsToCart() {
         JavascriptExecutor je = (JavascriptExecutor) getDriver();
         ArrayList<String> productNames = new ArrayList<>();
-        wait(1);
-        for (WebElement product : products) {
-            //TODO добавить проверку на нечетность
-//            if (product.isDisplayed()) {
-                je.executeScript("arguments[0].scrollIntoView(true);", product);
+
+        for (int i = 0; i < products.size(); i++) {
+            if ((i+1) % 2 == 0) {
+                je.executeScript("arguments[0].scrollIntoView(true);", products.get(i));
                 je.executeScript("scrollBy(0,-200);");
-                productNames.add(product
+                productNames.add(products.get(i)
                         .findElement(By.xpath(".//../../..//a/div[@class='eOneTile_ItemName']")).getText());
-                product.click();
-//            }
+                products.get(i).click();
+            }
         }
 
         variables.put("Товары в корзине", productNames);
     }
 
-    public void goToCart() {
-        cart.click();
-        wait(5);
-
-        ArrayList<String> productNamesInCart = new ArrayList<>();
-        for (int i = 0; i < productsInCart.size(); i++) {
-            productNamesInCart.add(productsInCart.get(i)
-                    .findElement(By.xpath(".//div[contains(@class,'eCartItem_name')]//span")).getText());
-        }
-
-        removeAll.click();
-
+    public void logout() {
         new Actions(getDriver()).moveToElement(userMenu).build().perform();
         visibilityOf(logout, timeout);
         logout.click();
+        visibilityOf(myOzon, timeout);
     }
 
 //    div class="bCartPage
-    public void checkEmptyOfCart() {
+    public void goToCart() {
         cart.click();
-        Assert.assertTrue("Не обнаружили фразы='Корзина пуста'", labelOfEmptyCart.isDisplayed());
-        Assert.assertTrue("В корзине имеются товары", productsInCart.isEmpty());
     }
 
 }
